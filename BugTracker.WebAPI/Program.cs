@@ -17,8 +17,14 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Ejecutar seeder solo en entorno de desarrollo
 if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<BugTrackerDbContext>();
+    context.Database.Migrate();
+    DataSeeder.Seed(context);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
