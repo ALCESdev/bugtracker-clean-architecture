@@ -6,6 +6,7 @@ namespace BugTracker.Application.Projects.Commands.CreateProject;
 public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, Guid>
 {
     private readonly IBugTrackerDbContext _context;
+
     public CreateProjectCommandHandler(IBugTrackerDbContext context)
     {
         _context = context;

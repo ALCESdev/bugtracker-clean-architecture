@@ -1,4 +1,6 @@
 ﻿using BugTracker.Application.Projects.Commands.CreateProject;
+using BugTracker.Application.Projects.Commands.DeleteProject;
+using BugTracker.Application.Projects.Commands.UpdateProject;
 using BugTracker.Application.Projects.DTOs;
 using BugTracker.Application.Projects.Queries.GetAllProjects;
 using BugTracker.Application.Projects.Queries.GetProjectById;
@@ -41,5 +43,30 @@ public class ProjectsController : ControllerBase
     {
         IEnumerable<ProjectDto> projects = await _mediator.Send(new GetAllProjectsQuery());
         return Ok(projects);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        bool result = await _mediator.Send(new DeleteProjectCommand(id));
+
+        if (!result)
+            return NotFound();
+
+        return Ok(result);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProjectCommand command)
+    {
+        if (id != command.Id)
+            return BadRequest("Project ID mismatch.");
+
+        bool result = await _mediator.Send(command);
+
+        if (!result)
+            return NotFound();
+
+        return Ok(result);
     }
 }
