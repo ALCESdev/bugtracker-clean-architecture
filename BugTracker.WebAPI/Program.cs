@@ -1,7 +1,7 @@
 using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.Commands.CreateProject;
 using BugTracker.Infrastructure.Persistence;
-using MediatR;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -15,8 +15,14 @@ builder.Services.AddDbContext<IBugTrackerDbContext, BugTrackerDbContext>(options
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<CreateProjectCommand>());
 
-builder.Services.AddControllers();
+// FluentValidation
+builder.Services.AddControllers()
+    .AddFluentValidation(config =>
+    {
+        config.RegisterValidatorsFromAssemblyContaining<CreateProjectCommandValidator>();
+    });
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
