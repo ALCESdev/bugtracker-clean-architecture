@@ -1,14 +1,22 @@
+using BugTracker.Application.Interfaces;
+using BugTracker.Application.Projects.Commands.CreateProject;
 using BugTracker.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración del DbContext
-builder.Services.AddDbContext<BugTrackerDbContext>(options =>
+// DbContext
+builder.Services.AddDbContext<IBugTrackerDbContext, BugTrackerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Swagger
+// MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblyContaining<CreateProjectCommand>());
+
+builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -17,7 +25,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Ejecutar seeder solo en entorno de desarrollo
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
@@ -30,5 +37,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.MapControllers();
 app.Run();

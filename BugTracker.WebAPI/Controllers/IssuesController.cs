@@ -13,12 +13,22 @@ namespace BugTracker.WebAPI.Controllers;
 [Route("api/[controller]")]
 public class IssuesController : Controller
 {
+    #region VARIABLES
+
     private readonly IMediator _mediator;
+
+    #endregion
+
+    #region CONSTRUCTORS
 
     public IssuesController(IMediator mediator)
     {
         _mediator = mediator;
     }
+
+    #endregion
+
+    #region METHODS
 
     [HttpPost]
     public async Task<IActionResult> CreateIssue([FromBody] CreateIssueCommand command)
@@ -69,4 +79,6 @@ public class IssuesController : Controller
 
         return Ok(result);
     }
+
+    #endregion
 }
