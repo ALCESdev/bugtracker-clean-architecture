@@ -14,7 +14,7 @@ public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand,
 
     public async Task<bool> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
     {
-        Project? project = await _context.Projects.FindAsync([request.ProjectId], cancellationToken);
+        Project? project = await _context.Projects.FindAsync([request.Id], cancellationToken);
         
         if (project is null)
             return false;
