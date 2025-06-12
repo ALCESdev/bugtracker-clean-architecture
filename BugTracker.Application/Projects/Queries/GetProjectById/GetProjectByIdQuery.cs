@@ -1,5 +1,6 @@
-﻿using MediatR;
+﻿using BugTracker.Application.Projects.DTOs;
+using MediatR;
 
 namespace BugTracker.Application.Projects.Queries.GetProjectById;
 
-public record GetProjectByIdQuery(Guid Id) : IRequest<Project?>;
+public record GetProjectByIdQuery(Guid Id) : IRequest<ProjectDto?>;

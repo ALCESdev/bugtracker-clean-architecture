@@ -1,4 +1,6 @@
 ﻿using BugTracker.Application.Projects.Commands.CreateProject;
+using BugTracker.Application.Projects.DTOs;
+using BugTracker.Application.Projects.Queries.GetAllProjects;
 using BugTracker.Application.Projects.Queries.GetProjectById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -26,11 +28,18 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        Project? project = await _mediator.Send(new GetProjectByIdQuery(id));
+        ProjectDto? project = await _mediator.Send(new GetProjectByIdQuery(id));
 
         if (project is null)
             return NotFound();
 
         return Ok(project);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        IEnumerable<ProjectDto> projects = await _mediator.Send(new GetAllProjectsQuery());
+        return Ok(projects);
     }
 }

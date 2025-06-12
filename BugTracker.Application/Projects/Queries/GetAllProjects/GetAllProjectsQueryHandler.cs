@@ -1,23 +1,21 @@
 ﻿using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.DTOs;
+using BugTracker.Application.Projects.Queries.GetAllProjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace BugTracker.Application.Projects.Queries.GetProjectById;
-
-public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, ProjectDto?>
+public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, IEnumerable<ProjectDto>>
 {
     private readonly IBugTrackerDbContext _context;
 
-    public GetProjectByIdQueryHandler(IBugTrackerDbContext context)
+    public GetAllProjectsQueryHandler(IBugTrackerDbContext context)
     {
         _context = context;
     }
 
-    public async Task<ProjectDto?> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ProjectDto>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
     {
         return await _context.Projects
-            .Where(p => p.Id == request.Id)
             .Select(p => new ProjectDto
             {
                 Id = p.Id,
@@ -25,6 +23,6 @@ public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, P
                 Description = p.Description,
                 CreatedAt = p.CreatedAt
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }
