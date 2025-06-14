@@ -1,5 +1,4 @@
-﻿using BugTracker.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Interfaces;
 
