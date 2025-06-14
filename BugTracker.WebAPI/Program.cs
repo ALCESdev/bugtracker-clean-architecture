@@ -2,6 +2,7 @@ using BugTracker.Application.Common.Behaviors;
 using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.Commands.CreateProject;
 using BugTracker.Infrastructure.Persistence;
+using BugTracker.WebAPI.Middlewares;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -48,5 +49,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
 app.Run();
