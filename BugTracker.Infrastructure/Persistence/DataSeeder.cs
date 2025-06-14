@@ -13,6 +13,10 @@ public static class DataSeeder
             {
                 Username = "admin",
                 Email = "admin@example.com",
+                PasswordHash = "adminHashedPassword",
+                FullName = "Administrador Principal",
+                PhoneNumber = "600000001",
+                Address = "Calle Admin 1",
                 UserRole = UserRole.Admin
             };
 
@@ -20,6 +24,10 @@ public static class DataSeeder
             {
                 Username = "developer",
                 Email = "dev@example.com",
+                PasswordHash = "developerHashedPassword",
+                FullName = "Desarrollador Ejemplo",
+                PhoneNumber = "600000002",
+                Address = "Calle Dev 2",
                 UserRole = UserRole.Developer
             };
 

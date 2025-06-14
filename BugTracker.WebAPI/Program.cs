@@ -70,6 +70,14 @@ try
         context.Database.Migrate();
         DataSeeder.Seed(context);
 
+        var config = builder.Configuration;
+        bool resetDb = config.GetValue<bool>("ResetDbOnStartup");
+
+        if (resetDb)
+        {
+            await DatabaseInitializer.ResetAsync(app.Services);
+        }
+
         app.UseSwagger();
         app.UseSwaggerUI();
     }
