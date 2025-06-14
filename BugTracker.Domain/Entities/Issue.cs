@@ -16,9 +16,11 @@ public class Issue
     public IssueStatus Status { get; set; } = IssueStatus.ToDo;
     public IssuePriority Priority { get; set; } = IssuePriority.Medium;
 
+    [Required]
     public Guid AssigneeId { get; set; }
     public User? Assignee { get; set; }
 
+    [Required]
     public Guid ReporterId { get; set; }
     public User? Reporter { get; set; }
 
