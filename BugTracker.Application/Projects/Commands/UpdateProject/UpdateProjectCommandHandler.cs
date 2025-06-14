@@ -1,5 +1,7 @@
-﻿using BugTracker.Application.Interfaces;
+﻿using BugTracker.Application.Common.Exceptions;
+using BugTracker.Application.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Projects.Commands.UpdateProject;
 
@@ -17,8 +19,8 @@ public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand,
         Project? project = await _context.Projects.FindAsync([request.Id], cancellationToken);
         
         if (project is null)
-            return false;
-        
+            throw new NotFoundException($"El proyecto con ID '{request.Id}' no existe.");
+
         project.Name = request.Name;
         project.Description = request.Description;
         await _context.SaveChangesAsync(cancellationToken);

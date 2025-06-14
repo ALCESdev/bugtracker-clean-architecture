@@ -1,4 +1,5 @@
-﻿using BugTracker.Application.Interfaces;
+﻿using BugTracker.Application.Common.Exceptions;
+using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,15 +17,17 @@ public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, P
 
     public async Task<ProjectDto?> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Projects
-            .Where(p => p.Id == request.Id)
-            .Select(p => new ProjectDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CreatedAt = p.CreatedAt
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        Project? project = await _context.Projects.FindAsync([request.Id], cancellationToken);
+
+        if (project is null)
+            throw new NotFoundException($"Project with ID {request.Id} not found.");
+
+        return new ProjectDto
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Description = project.Description,
+            CreatedAt = project.CreatedAt
+        };
     }
 }

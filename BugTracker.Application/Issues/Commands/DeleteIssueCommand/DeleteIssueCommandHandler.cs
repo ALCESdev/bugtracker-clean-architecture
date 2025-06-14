@@ -1,5 +1,7 @@
-﻿using BugTracker.Application.Interfaces;
+﻿using BugTracker.Application.Common.Exceptions;
+using BugTracker.Application.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Issues.Commands.DeleteIssueCommand;
 
@@ -17,7 +19,7 @@ public class DeleteIssueCommandHandler : IRequestHandler<DeleteIssueCommand, boo
         Issue? issue = await _context.Issues.FindAsync([ request.Id ], cancellationToken);
 
         if (issue is null)
-            return false;
+            throw new NotFoundException($"El issue con ID '{request.Id}' no existe.");
 
         _context.Issues.Remove(issue);
         await _context.SaveChangesAsync(cancellationToken);

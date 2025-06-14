@@ -1,54 +1,91 @@
-using BugTracker.Application.Common.Behaviors;
-using BugTracker.Application.Interfaces;
+﻿using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.Commands.CreateProject;
 using BugTracker.Infrastructure.Persistence;
 using BugTracker.WebAPI.Middlewares;
 using FluentValidation.AspNetCore;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
-builder.Services.AddDbContext<IBugTrackerDbContext, BugTrackerDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+try
+{
+    // Configurar opciones de columnas evitando duplicadas
+    ColumnOptions? columnOptions = new();
 
-// MediatR
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblyContaining<CreateProjectCommand>());
+    // Logger configuration
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // Less verbose logging
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+        .WriteTo.MSSqlServer(
+            connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+            sinkOptions: new MSSqlServerSinkOptions
+            {
+                TableName = "Logs",
+                AutoCreateSqlTable = true
+            },
+            columnOptions: columnOptions
+        )
+        .CreateLogger();
 
-// FluentValidation
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblyContaining<IApplicationMarker>());
+    builder.Logging.ClearProviders();
+    builder.Host.UseSerilog();
 
-builder.Services.AddControllers()
-    .AddFluentValidation(config =>
+    // DbContext
+    builder.Services.AddDbContext<IBugTrackerDbContext, BugTrackerDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    // MediatR
+    builder.Services.AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblyContaining<CreateProjectCommand>());
+
+    // FluentValidation
+    builder.Services.AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblyContaining<IApplicationMarker>());
+
+    builder.Services.AddControllers()
+        .AddFluentValidation(config =>
+        {
+            config.RegisterValidatorsFromAssemblyContaining<IApplicationMarker>();
+        });
+
+    // Swagger
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
     {
-        config.RegisterValidatorsFromAssemblyContaining<IApplicationMarker>();
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "BugTracker API", Version = "v1" });
     });
 
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BugTracker API", Version = "v1" });
-});
+    var app = builder.Build();
 
-var app = builder.Build();
+    if (app.Environment.IsDevelopment())
+    {
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<BugTrackerDbContext>();
+        context.Database.Migrate();
+        DataSeeder.Seed(context);
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<BugTrackerDbContext>();
-    context.Database.Migrate();
-    DataSeeder.Seed(context);
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+    app.MapControllers();
+
+    Log.Information("Iniciando BugTracker...");
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.MapControllers();
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "La aplicación BugTracker no pudo iniciarse correctamente.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

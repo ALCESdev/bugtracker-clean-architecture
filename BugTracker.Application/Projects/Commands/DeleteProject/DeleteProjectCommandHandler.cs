@@ -1,5 +1,7 @@
-﻿using BugTracker.Application.Interfaces;
+﻿using BugTracker.Application.Common.Exceptions;
+using BugTracker.Application.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Projects.Commands.DeleteProject;
 
@@ -17,8 +19,8 @@ public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand,
         Project? project = await _context.Projects.FindAsync([request.Id], cancellationToken);
         
         if (project is null)
-            return false;
-        
+            throw new NotFoundException($"El proyecto con ID '{request.Id}' no existe.");
+
         _context.Projects.Remove(project);
         await _context.SaveChangesAsync(cancellationToken);
         return true;

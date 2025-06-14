@@ -1,4 +1,5 @@
-﻿using BugTracker.WebAPI.DTOs;
+﻿using BugTracker.Application.Common.Exceptions;
+using BugTracker.WebAPI.DTOs;
 using System.Net;
 using System.Text.Json;
 
@@ -43,19 +44,53 @@ public class ExceptionHandlingMiddleware
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         string? env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        HttpResponse? response = context.Response;
+        response.ContentType = "application/json";
 
-        ErrorResponseDto? errorResponse = new()
+        ErrorResponseDto errorResponse = new()
         {
-            Message = "Ha ocurrido un error inesperado.",
-            Details = env == "Development" ? exception.Message : null
+            TraceId = context.TraceIdentifier,
         };
 
+        switch (exception)
+        {
+            case NotFoundException nfEx:
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                errorResponse.Message = nfEx.Message;
+                break;
+
+            case BadRequestException brEx:
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                errorResponse.Message = brEx.Message;
+                break;
+
+            case ForbiddenException fEx:
+                response.StatusCode = (int)HttpStatusCode.Forbidden;
+                errorResponse.Message = fEx.Message;
+                break;
+
+            case BusinessRuleValidationException bEx:
+                response.StatusCode = (int)HttpStatusCode.UnprocessableEntity; // 422
+                errorResponse.Message = bEx.Message;
+                break;
+
+            case ConflictException cEx:
+                response.StatusCode = (int)HttpStatusCode.Conflict;
+                errorResponse.Message = cEx.Message;
+                break;
+
+            default:
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                errorResponse.Message = "Ha ocurrido un error inesperado.";
+                break;
+        }
+
+        errorResponse.StatusCode = response.StatusCode;
+        if (env == "Development")
+            errorResponse.Details = exception.Message;
+
         string json = JsonSerializer.Serialize(errorResponse);
-
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-        return context.Response.WriteAsync(json);
+        return response.WriteAsync(json);
     }
 
     #endregion
