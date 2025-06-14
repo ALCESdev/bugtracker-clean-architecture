@@ -1,5 +1,6 @@
 ﻿using BugTracker.Application.Common.Exceptions;
 using BugTracker.Application.Interfaces;
+using BugTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,7 @@ public class UpdateIssueCommandHandler : IRequestHandler<UpdateIssueCommand, boo
 
     public async Task<bool> Handle(UpdateIssueCommand request, CancellationToken cancellationToken)
     {
-        Issue? issue = await _context.Issues.FindAsync(new object[] { request.Id }, cancellationToken);
+        Issue? issue = await _context.Issues.FindAsync([request.Id], cancellationToken);
 
         if (issue is null)
             throw new NotFoundException($"El issue con ID '{request.Id}' no existe.");

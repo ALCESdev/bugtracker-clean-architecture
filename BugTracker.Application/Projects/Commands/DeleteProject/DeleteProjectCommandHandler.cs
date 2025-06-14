@@ -1,7 +1,7 @@
 ﻿using BugTracker.Application.Common.Exceptions;
 using BugTracker.Application.Interfaces;
+using BugTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Projects.Commands.DeleteProject;
 

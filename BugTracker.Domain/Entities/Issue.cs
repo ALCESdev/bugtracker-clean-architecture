@@ -1,6 +1,7 @@
-﻿using BugTracker.Domain.Entities;
-using BugTracker.Domain.Enums;
+﻿using BugTracker.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+
+namespace BugTracker.Domain.Entities;
 
 public class Issue
 {

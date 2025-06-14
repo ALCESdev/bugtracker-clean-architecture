@@ -1,6 +1,7 @@
 ﻿using BugTracker.Application.Common.Exceptions;
 using BugTracker.Application.Interfaces;
 using BugTracker.Application.Issues.DTOs;
+using BugTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

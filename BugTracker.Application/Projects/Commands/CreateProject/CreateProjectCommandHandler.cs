@@ -1,4 +1,5 @@
 ﻿using BugTracker.Application.Interfaces;
+using BugTracker.Domain.Entities;
 using MediatR;
 
 namespace BugTracker.Application.Projects.Commands.CreateProject;

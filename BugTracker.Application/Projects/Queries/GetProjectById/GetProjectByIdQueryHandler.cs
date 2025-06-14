@@ -1,8 +1,8 @@
 ﻿using BugTracker.Application.Common.Exceptions;
 using BugTracker.Application.Interfaces;
 using BugTracker.Application.Projects.DTOs;
+using BugTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Application.Projects.Queries.GetProjectById;
 
